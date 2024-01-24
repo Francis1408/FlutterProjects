@@ -11,6 +11,7 @@ class FieldTitle extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.only(left: 3, bottom: 4),
         child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.end,
           children: [
             Text(
               '$title   ',
