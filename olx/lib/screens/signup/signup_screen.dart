@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:olx/components/custom_drawer/error_box.dart';
 import 'package:olx/screens/login/login_screen.dart';
 import 'package:olx/screens/signup/components/field_title.dart';
+import 'package:olx/stores/signup_store.dart';
 
 class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
+  SignUpScreen({super.key});
+
+  final SignupStore signupStore = SignupStore();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -31,17 +38,30 @@ class SignUpScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Observer(builder: (_) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: ErrorBox(
+                          message: signupStore.error,
+                        ),
+                      );
+                    }),
                     FieldTitle(
                       title: 'Apelido',
                       subtitle: 'Como aparecerá em seus anúncios.',
                     ),
-                    TextField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Exemplo: João S.',
-                        isDense: true,
-                      ),
-                    ),
+                    Observer(builder: (_) {
+                      return TextField(
+                        enabled: !signupStore.loading,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Exemplo: João S.',
+                          isDense: true,
+                          errorText: signupStore.nameError,
+                        ),
+                        onChanged: signupStore.setName,
+                      );
+                    }),
                     const SizedBox(
                       height: 16,
                     ),
@@ -49,15 +69,20 @@ class SignUpScreen extends StatelessWidget {
                       title: 'E-mail',
                       subtitle: 'Enviaremos um e-mail de confirmação.',
                     ),
-                    TextField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Exemplo: joao@gmail.com',
-                        isDense: true,
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      autocorrect: false,
-                    ),
+                    Observer(builder: (_) {
+                      return TextField(
+                        enabled: !signupStore.loading,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Exemplo: joao@gmail.com',
+                          isDense: true,
+                          errorText: signupStore.emailError,
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        autocorrect: false,
+                        onChanged: signupStore.setEmail,
+                      );
+                    }),
                     const SizedBox(
                       height: 16,
                     ),
@@ -65,17 +90,22 @@ class SignUpScreen extends StatelessWidget {
                       title: 'Celular',
                       subtitle: 'Proteja sua conta',
                     ),
-                    TextField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: '(99) 99999-9999',
-                        isDense: true,
-                      ),
-                      keyboardType: TextInputType.phone,
-                      /*inputFormatters: [
+                    Observer(builder: (_) {
+                      return TextField(
+                        enabled: !signupStore.loading,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: '(99) 99999-9999',
+                          isDense: true,
+                          errorText: signupStore.phoneError,
+                        ),
+                        keyboardType: TextInputType.phone,
+                        /*inputFormatters: [
                         WhitelistingTextInputFormatter.digitsOnly,
                       ], */
-                    ),
+                        onChanged: signupStore.setPhone,
+                      );
+                    }),
                     const SizedBox(
                       height: 16,
                     ),
@@ -83,14 +113,19 @@ class SignUpScreen extends StatelessWidget {
                       title: 'Senha',
                       subtitle: 'Use letras, números e caracteres especiais',
                     ),
-                    TextField(
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      obscureText: true,
-                      cursorColor: Colors.orange,
-                    ),
+                    Observer(builder: (_) {
+                      return TextField(
+                        enabled: !signupStore.loading,
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          isDense: true,
+                          errorText: signupStore.pass1Error,
+                        ),
+                        obscureText: true,
+                        cursorColor: Colors.orange,
+                        onChanged: signupStore.setPass1,
+                      );
+                    }),
                     const SizedBox(
                       height: 16,
                     ),
@@ -101,33 +136,48 @@ class SignUpScreen extends StatelessWidget {
                     const SizedBox(
                       height: 16,
                     ),
-                    TextField(
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      obscureText: true,
-                      cursorColor: Colors.orange,
-                    ),
+                    Observer(builder: (_) {
+                      return TextField(
+                        enabled: !signupStore.loading,
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          isDense: true,
+                          errorText: signupStore.pass2Error,
+                        ),
+                        obscureText: true,
+                        cursorColor: Colors.orange,
+                        onChanged: signupStore.setPass2,
+                      );
+                    }),
                     const SizedBox(
                       height: 16,
                     ),
-                    Container(
-                      height: 40,
-                      margin: const EdgeInsets.only(top: 20, bottom: 12),
-                      child: ElevatedButton(
-                        child: Text(
-                          'CADASTRAR',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
+                    Observer(builder: (_) {
+                      return Container(
+                        height: 40,
+                        margin: const EdgeInsets.only(top: 20, bottom: 12),
+                        child: ElevatedButton(
+                          child: signupStore.loading
+                              ? CircularProgressIndicator(
+                                  valueColor:
+                                      AlwaysStoppedAnimation(Colors.white),
+                                )
+                              : Text(
+                                  'CADASTRAR',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                          onPressed: signupStore.signUpPressed,
+                          style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,
+                            disabledBackgroundColor:
+                                Colors.orange.withAlpha(120),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20))),
-                      ),
-                    ),
+                                borderRadius: BorderRadius.circular(20)),
+                          ),
+                        ),
+                      );
+                    }),
                     Divider(
                       color: Colors.black,
                     ),
